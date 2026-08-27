@@ -1,0 +1,35 @@
+name: Sonda cron
+
+# Esperimento, non un pezzo dell'impianto: da cancellare appena ha risposto.
+#
+# Il 26/08 alle 14:25 UTC lo scheduler di GitHub ha smesso di innescare il cron
+# dell'ingestion su andrus98/personal-feed e non e' piu' ripartito: ne' dopo tre
+# push sul branch di default, ne' dopo aver rinominato il file, cioe' con un
+# workflow nuovo e una registrazione dello schedule nuova. Tutti quei tentativi
+# sono rimasti dentro lo stesso repo.
+#
+# Questa sonda risponde all'unica domanda che resta: il guasto e' di quel repo o
+# dell'account? Sta qui perche' personal-feed-data non ha mai avuto workflow,
+# quindi e' terreno vergine per lo scheduler. Non fa niente e non scrive niente:
+# stampa la data. Se scatta, l'ingestion puo' traslocare qui - e scrivendo nel
+# proprio repo col GITHUB_TOKEN si porterebbe via anche la deploy key. Se non
+# scatta, il problema e' dell'account e dentro Actions non c'e' rimedio.
+
+on:
+  schedule:
+    - cron: "*/10 * * * *"
+  workflow_dispatch:
+
+# Non deve poter toccare nulla: e' una sonda.
+permissions:
+  contents: read
+
+jobs:
+  battito:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Battito
+        run: |
+          date -u '+sonda viva: %Y-%m-%d %H:%M:%S UTC'
+          echo "innescata da: ${{ github.event_name }}"
